@@ -1,6 +1,8 @@
 import type { ComponentType } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { useState } from 'react'
+import { useAppState } from '../../context/AppStateContext'
+import ConfirmExitModal from '../shared/ConfirmExitModal'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import IconExchange from '../../assets/img/icons/icon-nav-exchange.svg'
 import IconHistory from '../../assets/img/icons/icon-nav-history.svg'
@@ -24,12 +26,23 @@ const navItems: NavItem[] = [
 export default function DashboardFooter() {
   const insets = useSafeAreaInsets()
   const [activeIndex, setActiveIndex] = useState(0)
+  const [exitModalVisible, setExitModalVisible] = useState(false)
+  const { logout } = useAppState()
 
   return (
     <View className="absolute left-0 right-0 bottom-0 bg-white py-6">
       <View className="flex-row">
         {navItems.map(({ label, Icon }, index) => (
-          <Pressable key={label} className="flex-1 items-center justify-center py-3" onPress={() => setActiveIndex(index)}>
+          <Pressable
+            key={label}
+            className="flex-1 items-center justify-center py-3"
+            onPress={() => {
+              setActiveIndex(index)
+              if (label === 'Perfil') {
+                setExitModalVisible(true)
+              }
+            }}
+          >
             <View className="mb-1">
               <Icon width={24} height={24} />
             </View>
@@ -37,6 +50,17 @@ export default function DashboardFooter() {
           </Pressable>
         ))}
       </View>
+      <ConfirmExitModal
+        visible={exitModalVisible}
+        onConfirm={() => {
+          setExitModalVisible(false)
+          logout()
+        }}
+        onCancel={() => setExitModalVisible(false)}
+        message="¿Deseas salir del aplicativo?"
+        confirmText="Aceptar"
+        cancelText="Cancelar"
+      />
     </View>
   )
 }
