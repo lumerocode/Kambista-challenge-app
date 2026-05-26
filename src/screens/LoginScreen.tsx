@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native'
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native'
 import { useAppState } from '../context/AppStateContext'
 import { normalizeLoginCredentials, validateEmail, validatePassword } from '../utils/authValidation'
 import BaseButton from '../components/ui/BaseButton'
 import BaseInput from '../components/ui/BaseInput'
 import ApiErrorModal from '../components/shared/ApiErrorModal'
-import LogoMain from '../assets/img/brand/logo-main.svg'
+import LogoMain from '../assets/img/brand/logo-main.png'
 
 export default function LoginScreen() {
   const { login, loginError, goToRoute } = useAppState()
@@ -53,13 +53,13 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-kambista-appBg">
-      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 40 }}>
+      <ScrollView className='px-6' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 40 }}>
         <View className="w-full flex flex-col">
-          <View className="flex justify-center items-center mb-[44px]">
-            <LogoMain width={136} />
+          <View className="flex justify-center items-center mb-[40px]">
+            <Image source={LogoMain} resizeMode="contain" className='w-[208px] h-[48px]'/>
           </View>
 
-          <Text className="font-sans font-normal text-2xl text-black text-center">Inicia sesión</Text>
+          <Text className="font-sans font-bold text-2xl text-black text-center">Inicia sesión</Text>
 
           <View className="flex flex-col gap-5 mt-[70px]">
             <View>

@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { ScrollView, Text, View } from 'react-native'
 import { useAppState } from '../context/AppStateContext'
 import Congrats from '../assets/img/illustrations/hand-holding-phone.svg'     
 import BaseButton from '../components/ui/BaseButton'

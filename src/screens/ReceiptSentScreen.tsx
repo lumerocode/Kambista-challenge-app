@@ -1,6 +1,5 @@
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { useAppState } from '../context/AppStateContext'
-import WhatsAppButton from '../components/shared/WhatsAppButton'
 
 export default function ReceiptSentScreen() {
   const { goToRoute } = useAppState()
@@ -31,8 +30,6 @@ export default function ReceiptSentScreen() {
         <View className="rounded-3xl bg-kambista-rewardBg p-4 mb-6">
           <Text className="text-sm font-semibold text-kambista-rewardText">Disfruta descuentos en tus próximas operaciones.</Text>
         </View>
-
-        <WhatsAppButton onPress={() => goToRoute('dashboard')} message="Volver al panel" />
 
         <Pressable onPress={() => goToRoute('dashboard')} className="rounded-3xl bg-kambista-mint px-5 py-4 items-center">
           <Text className="text-base font-semibold text-kambista-navy">VOLVER AL PANEL</Text>

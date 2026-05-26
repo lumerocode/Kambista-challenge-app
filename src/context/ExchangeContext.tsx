@@ -24,6 +24,8 @@ interface ExchangeContextValue {
   goToCalculator: () => void
   resetOperation: () => void
   retryLoadRates: () => Promise<void>
+  setOriginCurrency: (currency: CurrencyCode) => void
+  setDestinationCurrency: (currency: CurrencyCode) => void
 }
 
 const ExchangeContext = createContext<ExchangeContextValue | null>(null)
@@ -38,7 +40,7 @@ export function ExchangeProvider({ children }: { children: ReactNode }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [activeScreen, setActiveScreen] = useState<ScreenKey>('calculator')
   const [mode, setModeState] = useState<ExchangeMode>('buy')
-  const [amount, setAmountState] = useState('')
+  const [amount, setAmountState] = useState('10000')
   const [originCurrency, setOriginCurrency] = useState<CurrencyCode>(defaultOriginCurrency)
   const [destinationCurrency, setDestinationCurrency] = useState<CurrencyCode>(defaultDestinationCurrency)
   const [calculation, setCalculation] = useState<ExchangeCalculation | null>(null)
@@ -46,6 +48,37 @@ export function ExchangeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void loadRates()
   }, [])
+
+  useEffect(() => {
+    if (!amount || !currentRates) {
+      setCalculation(null)
+      return
+    }
+
+    const parsedAmount = Number(amount.replace(/,/g, '').trim())
+    if (!parsedAmount || parsedAmount <= 0) {
+      setCalculation(null)
+      return
+    }
+
+    const performAutoCalculate = async () => {
+      try {
+        const result = await simulateExchange({
+          amount: parsedAmount,
+          mode,
+          originCurrency,
+          destinationCurrency,
+          rates: currentRates
+        })
+        setCalculation(result)
+      } catch {
+        // No mostrar error en cálculo automático
+        setCalculation(null)
+      }
+    }
+
+    void performAutoCalculate()
+  }, [amount, mode, originCurrency, destinationCurrency, currentRates])
 
   const loadRates = async () => {
     setIsLoadingRates(true)
@@ -63,13 +96,6 @@ export function ExchangeProvider({ children }: { children: ReactNode }) {
 
   const updateMode = (selectedMode: ExchangeMode) => {
     setModeState(selectedMode)
-    if (selectedMode === 'buy') {
-      setOriginCurrency('PEN')
-      setDestinationCurrency('USD')
-    } else {
-      setOriginCurrency('USD')
-      setDestinationCurrency('PEN')
-    }
     setCalculation(null)
     setErrorMessage(null)
   }
@@ -80,14 +106,33 @@ export function ExchangeProvider({ children }: { children: ReactNode }) {
   }, [amount])
 
   const swapCurrencies = () => {
-    setOriginCurrency((current) => {
-      const next = current === 'PEN' ? 'USD' : 'PEN'
-      setDestinationCurrency(current)
-      setModeState(next === 'PEN' ? 'buy' : 'sell')
-      setCalculation(null)
-      setErrorMessage(null)
-      return next
-    })
+    const currentOrigin = originCurrency
+    const currentDestination = destinationCurrency
+
+    setOriginCurrency(currentDestination)
+    setDestinationCurrency(currentOrigin)
+    setCalculation(null)
+    setErrorMessage(null)
+  }
+
+  const updateOriginCurrency = (currency: CurrencyCode) => {
+    if (currency === originCurrency) return
+    if (currency === destinationCurrency) {
+      setDestinationCurrency(originCurrency)
+    }
+    setOriginCurrency(currency)
+    setCalculation(null)
+    setErrorMessage(null)
+  }
+
+  const updateDestinationCurrency = (currency: CurrencyCode) => {
+    if (currency === destinationCurrency) return
+    if (currency === originCurrency) {
+      setOriginCurrency(destinationCurrency)
+    }
+    setDestinationCurrency(currency)
+    setCalculation(null)
+    setErrorMessage(null)
   }
 
   const calculateExchange = async () => {
@@ -158,6 +203,8 @@ export function ExchangeProvider({ children }: { children: ReactNode }) {
     calculation,
     setAmount: setAmountState,
     setMode: updateMode,
+    setOriginCurrency: updateOriginCurrency,
+    setDestinationCurrency: updateDestinationCurrency,
     swapCurrencies,
     calculateExchange,
     goToSummary,
